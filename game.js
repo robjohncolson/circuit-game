@@ -225,9 +225,20 @@ function drawLevel(levelNum) {
          level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
+  // Goal Circle with visual feedback
+  let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
+  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
+  let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
   let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
   let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
-  fill(0, 255, 0);
+  let goalRadius = goalSize / 2;
+
+  if (distance + player.radius * scale < goalRadius) {
+    fill(0, 255, 0, sin(frameCount * 0.1) * 127 + 128); // Pulsing green
+    text("Press Space to proceed!", 10, 80 * scaleY); // HUD message
+  } else {
+    fill(0, 255, 0); // Regular green
+  }
   ellipse(level.goalCircle.x * scaleX, level.goalCircle.y * scaleY, goalSize);
 
   fill(0, 0, 255);

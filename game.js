@@ -17,7 +17,17 @@ let cameraX = 0; // Smoothed camera position
 
 // Level definitions with detailed intros
 let levels = [
-  { name: "Input", intro: "Welcome to Coulomb's Odyssey! Guide a coulomb of charge through a power electronics system. Your goal is to reach the red door to proceed.", platforms: [], components: [], door: { x: 700, y: 300, width: 50, height: 100 } },
+  {
+    name: "Input",
+    intro: "Welcome to Coulomb's Odyssey! Reduce ripple by charging capacitors to grow the goal circle, then jump through to proceed.",
+    platforms: [],
+    components: [
+      { type: 'capacitor', x: 200, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 500, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 }
+  },
   { name: "Schottky Diode", intro: "Encounter a Schottky Diode, which allows current in one direction but drops voltage. Pay 0.3V to lower the barrier and reach the door!", platforms: [{ x: 250, y: 340, width: 100, height: 20 }], components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false } },
   { name: "Capacitor", intro: "Capacitors store energy. Stand on the capacitor until it's fully charged (green) to gain 2V, then proceed to the door.", platforms: [{ x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
   { name: "BQ24133 Charger IC", intro: "Adjust the BQ24133 Charger IC's current to 1.125A using left/right arrow keys. When within ±0.01A, proceed to the door.", platforms: [{ x: 300, y: 340, width: 100, height: 20 }], components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, adjusted: false },

@@ -324,8 +324,10 @@ function updatePlayer(level) {
         if (keyIsDown(RIGHT_ARROW)) {
           c.current = min(2.0, c.current + rate);
         }
-        if (abs(c.current - c.targetCurrent) < 0.01) {
-          level.adjusted = true;
+        if (keyIsPressed && key === ' ') {
+          if (abs(c.current - c.targetCurrent) < 0.01) {
+            level.adjusted = true;
+          }
         }
       } else if (c.type === 'cell') {
         if (keyIsDown(CONTROL)) {

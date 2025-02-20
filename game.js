@@ -27,7 +27,7 @@ let levels = [
       { type: 'capacitor', x: 500, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     goalSizeMode: 'ripple'
   },
   {
@@ -40,7 +40,7 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     goalSizeMode: 'ripple',
     barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
   },
@@ -53,7 +53,7 @@ let levels = [
       { type: 'capacitor', x: 200, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     goalSizeMode: 'ripple',
     charged: false
   },
@@ -67,7 +67,7 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     goalSizeMode: 'current',
     adjusted: false
   },
@@ -81,7 +81,7 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     goalSizeMode: 'ripple',
     charged: false
   },
@@ -96,7 +96,7 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     balanced: false,
     goalSizeMode: 'ripple'
   },
@@ -111,7 +111,7 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 30 },
     minVoltage: 5.0,
     goalSizeMode: 'ripple'
   }

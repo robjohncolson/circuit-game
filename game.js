@@ -412,16 +412,35 @@ function updatePlayer(level) {
   let scaleX = width / 800;
   let scaleY = height / 400;
   let scale = min(scaleX, scaleY);
-  let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
-  let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
   
+  // Calculate player size
+  let playerDiameter = player.radius * 2 * scale; // 20 * scale
+  
+  // Calculate goal size based on mode
+  let goalSize;
+  if (level.goalSizeMode === 'current') {
+    let charger = level.components.find(c => c.type === 'charger');
+    if (charger) {
+      let difference = abs(charger.current - charger.targetCurrent);
+      let maxDifference = 0.2;
+      let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
+      goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor) * scale;
+    } else {
+      goalSize = level.goalCircle.baseSize * scale;
+    }
+  } else {
+    let rippleFraction = Math.max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+    goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
+  }
+  
+  let goalRadius = goalSize / 2; // Half of the goal circle's diameter
+
   let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
-  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
+  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleX };
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
-  let goalRadius = goalSize / 2;
 
   // Relaxed condition: Allow partial overlap
-  if (distance < goalRadius - player.radius * scale * 0.5 && keyIsPressed && key === ' ') {
+  if (distance < goalRadius - playerDiameter / 2 && keyIsPressed && key === ' ') {
     // Player is sufficiently inside and pressed spacebar
     if (currentLevel === 1 || 
         (currentLevel === 2 && level.barrier.lowered) || 
@@ -451,7 +470,7 @@ function updatePlayer(level) {
   }
 
   // Update visual feedback in drawLevel to match the relaxed condition
-  inGoalArea = distance < goalRadius - player.radius * scale * 0.5;
+  inGoalArea = distance < goalRadius - playerDiameter / 2;
   if (inGoalArea) {
     inGoalTimer = inGoalGracePeriod;
   } else if (inGoalTimer > 0) {

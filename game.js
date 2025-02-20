@@ -1,5 +1,5 @@
 // Global game variables
-let currentLevel = 0; // 0 = menu, 1 = level 1, 2 = level 2, etc.
+let currentLevel = 0;
 let player = { 
   x: 50, 
   y: 370, 
@@ -10,73 +10,19 @@ let player = {
 };
 let gravity = 0.5;
 let groundY = 380;
-let jumpVelocity = -12; // Ensures player can reach platforms
+let jumpVelocity = -12;
 let onGround = true;
-let showIntro = true; // Track if showing intro screen
+let showIntro = true;
 
-// Level definitions
+// Level definitions with detailed intros
 let levels = [
-  { // Level 1: Input
-    name: "Input",
-    intro: "Welcome to your first power electronics challenge!",
-    platforms: [],
-    components: [],
-    door: { x: 700, y: 300, width: 50, height: 100 }
-  },
-  { // Level 2: Schottky Diode
-    name: "Schottky Diode",
-    intro: "Learn about voltage drop across diodes",
-    platforms: [{ x: 250, y: 340, width: 100, height: 20 }],
-    components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3 }],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
-  },
-  { // Level 3: Capacitor
-    name: "Capacitor",
-    intro: "Store and release electrical energy",
-    platforms: [{ x: 400, y: 340, width: 100, height: 20 }],
-    components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    charged: false
-  },
-  { // Level 4: BQ24133 Charger IC
-    name: "BQ24133 Charger IC",
-    intro: "Adjust the charging current precisely",
-    platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
-    components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    adjusted: false
-  },
-  { // Level 5: Lithium-Ion Cell
-    name: "Lithium-Ion Cell",
-    intro: "Charge a battery cell to its target voltage",
-    platforms: [{ x: 350, y: 340, width: 100, height: 20 }],
-    components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    charged: false
-  },
-  { // Level 6: BMS
-    name: "Battery Management System",
-    intro: "Balance multiple cells to the same voltage",
-    platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }],
-    components: [
-      { type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 },
-      { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 }
-    ],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    balanced: false
-  },
-  { // Level 7: Load Path
-    name: "Load Path",
-    intro: "Navigate through resistors while maintaining voltage",
-    platforms: [{ x: 100, y: 340, width: 600, height: 20 }],
-    components: [
-      { type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0 },
-      { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0 }
-    ],
-    door: { x: 700, y: 300, width: 50, height: 100 },
-    minVoltage: 5.0
-  }
+  { name: "Input", intro: "Welcome to Coulomb's Odyssey! Guide a coulomb of charge through a power electronics system. Your goal is to reach the red door to proceed.", platforms: [], components: [], door: { x: 700, y: 300, width: 50, height: 100 } },
+  { name: "Schottky Diode", intro: "Encounter a Schottky Diode, which allows current in one direction but drops voltage. Pay 0.3V to lower the barrier and reach the door!", platforms: [{ x: 250, y: 340, width: 100, height: 20 }], components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false } },
+  { name: "Capacitor", intro: "Capacitors store energy. Stand on the capacitor until it’s fully charged (green) to gain 2V, then proceed to the door.", platforms: [{ x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
+  { name: "BQ24133 Charger IC", intro: "Adjust the BQ24133 Charger IC’s current to 1.125A using left/right arrow keys. When within ±0.01A, proceed to the door.", platforms: [{ x: 300, y: 340, width: 100, height: 20 }], components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, adjusted: false },
+  { name: "Lithium-Ion Cell", intro: "Charge the lithium-ion cell to 4.2V by standing on it. Transfer voltage until it’s full, then head to the door.", platforms: [{ x: 350, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
+  { name: "Battery Management System", intro: "Balance two cells to 4.0V each. Stand on a cell and press Space to transfer voltage, keeping at least 5V for yourself. Then reach the door.", platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 }, { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 }], door: { x: 700, y: 300, width: 50, height: 100 }, balanced: false },
+  { name: "Load Path", intro: "Navigate past resistors that drain 1V each. Reach the door with at least 5V to power the load and win!", platforms: [{ x: 100, y: 340, width: 600, height: 20 }], components: [{ type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0, paid: false }, { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, minVoltage: 5.0 }
 ];
 
 function setup() {
@@ -91,14 +37,13 @@ function draw() {
   } else if (currentLevel > 0 && currentLevel <= levels.length) {
     let level = levels[currentLevel - 1];
     if (showIntro) {
-      // Draw intro screen
       textAlign(CENTER);
       textSize(24);
       fill(0);
-      text("Level " + currentLevel + ": " + level.name, width / 2, height / 2 - 20);
+      text("Level " + currentLevel + ": " + level.name, width / 2, height / 2 - 40);
       textSize(16);
-      text(level.intro, width / 2, height / 2);
-      text("Press Enter to continue", width / 2, height / 2 + 20);
+      text(level.intro, width / 2, height / 2 - 10, width - 40);
+      text("Press Enter to continue", width / 2, height / 2 + 40);
       if (keyIsPressed && keyCode === ENTER) {
         showIntro = false;
       }
@@ -106,7 +51,6 @@ function draw() {
       drawLevel(currentLevel);
     }
   } else {
-    // Game complete screen
     textAlign(CENTER);
     textSize(32);
     fill(0);
@@ -125,25 +69,23 @@ function drawMenu() {
 
 function drawLevel(levelNum) {
   let level = levels[levelNum - 1];
-  let cameraX = constrain(player.x - width / 2, 0, width); // Camera follows player
+  let cameraX = player.x - width / 2; // Allow negative values for parallax
 
-  // Parallax background layers with vertical lines
+  // Parallax background layers
   fill(184, 134, 11);
   for (let x = -cameraX * 0.2; x < width * 2; x += 100) {
-    rect(x, 0, 5, height); // Background moves at 20% of player speed
+    rect(x, 0, 5, height);
   }
-
   fill(150);
   for (let x = -cameraX * 0.5; x < width * 2; x += 50) {
-    rect(x, 0, 3, height); // Midground moves at 50% of player speed
+    rect(x, 0, 3, height);
   }
 
-  // Draw game world with camera offset
   push();
   translate(-cameraX, 0);
 
   // Draw ground
-  fill(139, 69, 19); // Brown ground
+  fill(139, 69, 19);
   rect(0, groundY, width * 2, height - groundY);
 
   // Draw platforms
@@ -168,17 +110,17 @@ function drawLevel(levelNum) {
         rect(c.x, c.y, c.width * chargeRatio, c.height);
       }
     } else if (c.type === 'charger') {
-      fill(255, 215, 0); // Gold
+      fill(255, 215, 0);
       rect(c.x, c.y, c.width, c.height);
       fill(0);
       text("I: " + c.current.toFixed(3) + "A", c.x, c.y - 10);
     } else if (c.type === 'cell') {
-      fill(0, 255, 255); // Cyan
+      fill(0, 255, 255);
       rect(c.x, c.y, c.width, c.height);
       fill(0);
       text(c.voltage.toFixed(1) + "V", c.x, c.y - 10);
     } else if (c.type === 'resistor') {
-      fill(165, 42, 42); // Brown
+      fill(165, 42, 42);
       rect(c.x, c.y, c.width, c.height);
     }
   }
@@ -199,43 +141,39 @@ function drawLevel(levelNum) {
 
   pop();
 
-  // Draw HUD and instructions in screen space (fixed at top-left)
+  // Draw HUD and instructions in screen space
+  push();
   textAlign(LEFT);
   textSize(16);
   fill(0);
   text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20);
-  
   if (levelNum === 1) {
     text("Reach the door!", 10, 40);
   } else if (levelNum === 2) {
     text("Pay 0.3V at the diode to pass!", 10, 40);
   } else if (levelNum === 3) {
     text("Stand on the capacitor to charge!", 10, 40);
-    if (level.charged) {
-      text("Charged! Proceed to the door.", 10, 60);
-    }
+    if (level.charged) text("Charged! Proceed to the door.", 10, 60);
   } else if (levelNum === 4) {
-    text("Adjust current to 1.125A, then press Space!", 10, 40);
+    text("Adjust current to 1.125A with arrow keys!", 10, 40);
   } else if (levelNum === 5) {
     text("Stand on the cell to charge it to 4.2V!", 10, 40);
   } else if (levelNum === 6) {
-    text("Balance both cells to 4.0V!", 10, 40);
+    text("Press Space on cells to balance to 4.0V!", 10, 40);
   } else if (levelNum === 7) {
-    text("Reach the load with at least 5V!", 10, 40);
+    text("Reach the door with at least 5V!", 10, 40);
   }
+  pop();
 
-  // Update player and game logic (unchanged)
   updatePlayer(level);
 }
 
 function updatePlayer(level) {
-  // Movement controls
   if (keyIsDown(LEFT_ARROW)) player.vx -= 0.5;
   if (keyIsDown(RIGHT_ARROW)) player.vx += 0.5;
-  player.vx *= 0.9; // Friction
+  player.vx *= 0.9;
   player.x += player.vx;
 
-  // Jumping
   if (keyIsDown(UP_ARROW) && onGround) {
     player.vy = jumpVelocity;
     onGround = false;
@@ -243,18 +181,16 @@ function updatePlayer(level) {
   player.vy += gravity;
   player.y += player.vy;
 
-  // Ground collision
   if (player.y >= groundY - player.radius) {
     player.y = groundY - player.radius;
     player.vy = 0;
     onGround = true;
   } else if (player.vy > 0) {
-    onGround = false; // In air unless on platform
+    onGround = false;
   }
 
-  // Platform collisions
   for (let p of level.platforms) {
-    if (player.vy > 0 && // Falling
+    if (player.vy > 0 && 
         player.y + player.radius > p.y && 
         player.y - player.radius < p.y + p.height && 
         player.x > p.x && 
@@ -265,7 +201,6 @@ function updatePlayer(level) {
     }
   }
 
-  // Component interactions
   for (let c of level.components) {
     if (overlap(player, c)) {
       if (c.type === 'diode' && !c.paid) {
@@ -277,27 +212,26 @@ function updatePlayer(level) {
       } else if (c.type === 'capacitor' && !level.charged) {
         c.chargeLevel++;
         if (c.chargeLevel >= c.chargeTime) {
-          player.voltage += 2.0; // Gain voltage
+          player.voltage += 2.0;
           level.charged = true;
         }
       } else if (c.type === 'charger' && !level.adjusted) {
-        // Charger current adjustment with finer control
         if (keyIsDown(LEFT_ARROW)) {
           c.current = max(0.5, c.current - 0.001);
         }
         if (keyIsDown(RIGHT_ARROW)) {
           c.current = min(2.0, c.current + 0.001);
         }
-        // Automatically detect when current matches target
         if (abs(c.current - c.targetCurrent) < 0.01) {
           level.adjusted = true;
         }
       } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0.1) {
-        // Cell charging with minimum voltage protection
         if (currentLevel === 6 && keyIsPressed && key === ' ') {
-          c.voltage = min(c.targetVoltage, c.voltage + 0.1);
-          player.voltage -= 0.1;
-        } else if (currentLevel === 5) { // Regular cell charging level
+          if (player.voltage > 5.1) {
+            c.voltage = min(c.targetVoltage, c.voltage + 0.1);
+            player.voltage -= 0.1;
+          }
+        } else if (currentLevel === 5) {
           c.voltage = min(c.targetVoltage, c.voltage + 0.1);
           player.voltage = max(0.1, player.voltage - 0.1);
           if (c.voltage >= c.targetVoltage) {
@@ -313,30 +247,26 @@ function updatePlayer(level) {
     }
   }
 
-  // BMS balancing check (Level 6)
   if (currentLevel === 6) {
     let cells = level.components;
-    // Check if cells are balanced at target voltage
     if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
         abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
       level.balanced = true;
     }
   }
 
-  // Keep player within level bounds
   player.x = constrain(player.x, player.radius, width * 2 - player.radius);
 
-  // Check level completion conditions
   if (overlap(player, level.door)) {
-    if (currentLevel === 1 || // Basic level
-        (currentLevel === 2 && level.barrier.lowered) || // Diode level
-        (currentLevel === 3 && level.charged) || // Capacitor level
-        (currentLevel === 4 && level.adjusted) || // Charger level
-        (currentLevel === 5 && level.charged) || // Cell level
-        (currentLevel === 6 && level.balanced) || // BMS level
-        (currentLevel === 7 && player.voltage >= level.minVoltage)) { // Load level
+    if (currentLevel === 1 || 
+        (currentLevel === 2 && level.barrier.lowered) || 
+        (currentLevel === 3 && level.charged) || 
+        (currentLevel === 4 && level.adjusted) || 
+        (currentLevel === 5 && level.charged) || 
+        (currentLevel === 6 && level.balanced) || 
+        (currentLevel === 7 && player.voltage >= level.minVoltage)) {
       currentLevel++;
-      showIntro = true; // Show intro for next level
+      showIntro = true;
       player.x = 50;
       player.y = groundY - player.radius;
       player.vx = 0;
@@ -351,27 +281,6 @@ function keyPressed() {
     showIntro = true;
   } else if (showIntro && keyCode === ENTER) {
     showIntro = false;
-  } else if (currentLevel > 0) {
-    let level = levels[currentLevel - 1];
-    if (keyCode === 32) { // Spacebar
-      for (let c of level.components) {
-        if (overlap(player, c)) {
-          if (c.type === 'diode' && player.voltage >= c.toll) {
-            player.voltage -= c.toll;
-            level.barrier.lowered = true;
-          }
-        }
-      }
-      if (overlap(player, level.door)) {
-        if ((currentLevel === 2 && level.barrier.lowered) || 
-            currentLevel === 1 || 
-            (currentLevel === 3 && level.charged)) {
-          currentLevel++;
-          player.x = 50;
-          player.y = groundY - player.radius;
-        }
-      }
-    }
   }
 }
 

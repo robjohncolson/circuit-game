@@ -246,22 +246,26 @@ function updatePlayer(level) {
           c.paid = true;
           level.barrier.lowered = true;
         }
-      } else if (c.type === 'capacitor' && !level.charged) {
+      } else if (c.type === 'capacitor' && !c.charged) {
         c.chargeLevel++;
         if (c.chargeLevel >= c.chargeTime) {
-          player.voltage += 2.0;
-          level.charged = true;
+          c.charged = true;
+          level.ripple.current = max(0, level.ripple.current - c.rippleReduction);
+          if (currentLevel === 3 && c.isMain) { // Capacitor level main task
+            player.voltage += 2.0;
+            level.charged = true;
+          }
         }
       } else if (c.type === 'charger' && !level.adjusted) {
-        let rate = keyIsDown(SHIFT) ? 0.01 : 0.001; // Turbo mode with Shift
+        let rate = keyIsDown(SHIFT) ? 0.01 : 0.001;
         if (keyIsDown(LEFT_ARROW)) {
-          c.current = max(0.5, c.current - rate); // Lower limit at 0.5A
+          c.current = max(0.5, c.current - rate);
         }
         if (keyIsDown(RIGHT_ARROW)) {
-          c.current = min(2.0, c.current + rate); // Upper limit at 2.0A
+          c.current = min(2.0, c.current + rate);
         }
         if (abs(c.current - c.targetCurrent) < 0.01) {
-          level.adjusted = true; // Success!
+          level.adjusted = true;
         }
       } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0.1) {
         if (currentLevel === 6 && keyIsPressed && key === ' ') {
@@ -286,7 +290,7 @@ function updatePlayer(level) {
   }
 
   if (currentLevel === 6) {
-    let cells = level.components;
+    let cells = level.components.filter(c => c.type === 'cell');
     if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
         abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
       level.balanced = true;
@@ -295,7 +299,16 @@ function updatePlayer(level) {
 
   player.x = constrain(player.x, player.radius, width * 2 - player.radius);
 
-  if (overlap(player, level.door)) {
+  // Check goal circle overlap
+  let scaleX = width / 800;
+  let scaleY = height / 400;
+  let scale = min(scaleX, scaleY);
+  let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+  let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
+  let scaledPlayer = { x: player.x * scaleX, y: player.y * scaleY, radius: player.radius * scale };
+  let scaledGoal = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY, radius: goalSize / 2 };
+
+  if (circleOverlap(scaledPlayer, scaledGoal)) {
     if (currentLevel === 1 || 
         (currentLevel === 2 && level.barrier.lowered) || 
         (currentLevel === 3 && level.charged) || 
@@ -309,6 +322,17 @@ function updatePlayer(level) {
       player.y = groundY - player.radius;
       player.vx = 0;
       player.vy = 0;
+      // Reset ripple and capacitors for the next level
+      if (currentLevel <= levels.length) {
+        let nextLevel = levels[currentLevel - 1];
+        nextLevel.ripple.current = nextLevel.ripple.initial;
+        for (let c of nextLevel.components) {
+          if (c.type === 'capacitor') {
+            c.charged = false;
+            c.chargeLevel = 0;
+          }
+        }
+      }
     }
   }
 }

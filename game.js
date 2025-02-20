@@ -141,6 +141,19 @@ function drawLevel(levelNum) {
         fill(0, 255, 0);
         rect(c.x, c.y, c.width * chargeRatio, c.height);
       }
+    } else if (c.type === 'charger') {
+      fill(255, 215, 0); // Gold
+      rect(c.x, c.y, c.width, c.height);
+      fill(0);
+      text("I: " + c.current.toFixed(3) + "A", c.x, c.y - 10);
+    } else if (c.type === 'cell') {
+      fill(0, 255, 255); // Cyan
+      rect(c.x, c.y, c.width, c.height);
+      fill(0);
+      text(c.voltage.toFixed(1) + "V", c.x, c.y - 10);
+    } else if (c.type === 'resistor') {
+      fill(165, 42, 42); // Brown
+      rect(c.x, c.y, c.width, c.height);
     }
   }
 

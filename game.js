@@ -325,7 +325,6 @@ goalSize *= scale;
 
   updatePlayer(level);
 }
-
 function updatePlayer(level) {
     if (keyIsDown(LEFT_ARROW)) player.vx -= 0.5;
     if (keyIsDown(RIGHT_ARROW)) player.vx += 0.5;
@@ -474,86 +473,6 @@ function updatePlayer(level) {
       }
     }
   }
-
-  if (currentLevel === 6) {
-    let cells = level.components.filter(c => c.type === 'cell');
-    if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
-        abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
-      level.balanced = true;
-    }
-  }
-
-  player.x = constrain(player.x, player.radius, width * 2 - player.radius);
-
-  // Check goal circle completion
-  let scaleX = width / 800;
-  let scaleY = height / 400;
-  let scale = min(scaleX, scaleY);
-  
-  // Calculate player size
-  let playerDiameter = player.radius * 2 * scale; // 20 * scale
-  
-  // Calculate goal size based on mode
-  let goalSize;
-  if (level.goalSizeMode === 'current') {
-    let charger = level.components.find(c => c.type === 'charger');
-    if (charger) {
-      let difference = abs(charger.current - charger.targetCurrent);
-      let maxDifference = 0.2;
-      let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
-      goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor) * scale;
-    } else {
-      goalSize = level.goalCircle.baseSize * scale;
-    }
-  } else {
-    let rippleFraction = Math.max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
-    goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
-  }
-  
-  let goalRadius = goalSize / 2; // Half of the goal circle's diameter
-
-  let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
-  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
-  let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
-
-  // Relaxed condition: Allow partial overlap
-  if (distance < goalRadius - playerDiameter / 3 && keyIsPressed && key === ' ') {
-    // Player is sufficiently inside and pressed spacebar
-    if (currentLevel === 1 || 
-        (currentLevel === 2 && level.barrier.lowered) || 
-        (currentLevel === 3 && level.charged) || 
-        (currentLevel === 4 && level.adjusted) || 
-        (currentLevel === 5 && level.charged) || 
-        (currentLevel === 6 && level.balanced) || 
-        (currentLevel === 7 && player.voltage >= level.minVoltage)) {
-      currentLevel++;
-      showIntro = true;
-      player.x = 50;
-      player.y = groundY - player.radius;
-      player.vx = 0;
-      player.vy = 0;
-      // Reset ripple and capacitors for the next level
-      if (currentLevel <= levels.length) {
-        let nextLevel = levels[currentLevel - 1];
-        nextLevel.ripple.current = nextLevel.ripple.initial;
-        for (let c of nextLevel.components) {
-          if (c.type === 'capacitor') {
-            c.charged = false;
-            c.chargeLevel = 0;
-          }
-        }
-      }
-    }
-  }
-
-  // Update visual feedback in drawLevel to match the relaxed condition
-  inGoalArea = distance < goalRadius - playerDiameter / 3;
-  if (inGoalArea) {
-    inGoalTimer = inGoalGracePeriod;
-  } else if (inGoalTimer > 0) {
-    inGoalTimer--;
-  }
-}
 
 function keyPressed() {
   if (currentLevel === 0 && keyCode === ENTER) {

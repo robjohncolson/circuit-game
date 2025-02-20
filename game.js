@@ -243,17 +243,16 @@ function drawLevel(levelNum) {
       let difference = abs(charger.current - charger.targetCurrent);
       let maxDifference = 0.2; // Goal grows/shrinks within ±0.2A of target
       let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
-      goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor;
+      goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor) * scale;
     } else {
-      goalSize = level.goalCircle.baseSize; // Fallback
+      goalSize = level.goalCircle.baseSize * scale; // Fallback
     }
   } else if (level.goalSizeMode === 'ripple') { // Standard levels
-    let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
-    goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction;
+    let rippleFraction = Math.max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+    goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
   } else {
-    goalSize = level.goalCircle.baseSize; // Fallback for undefined modes
+    goalSize = level.goalCircle.baseSize * scale; // Fallback for undefined modes
   }
-  goalSize *= scale; // Apply scaling
 
   // Player shake effect (always based on ripple)
   let maxShake = 5;
@@ -267,7 +266,7 @@ function drawLevel(levelNum) {
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
   let goalRadius = goalSize / 2;
 
-  if (distance + player.radius * scale < goalRadius) {
+  if (distance + player.radius * scale * 0.5 < goalRadius) {
     fill(0, 255, 0, sin(frameCount * 0.1) * 127 + 128); // Pulsing green
     text("Press Space to proceed!", 10, 80 * scaleY); // HUD message
   } else {

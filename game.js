@@ -327,83 +327,149 @@ for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
 }
 
 function updatePlayer(level) {
-  if (keyIsDown(LEFT_ARROW)) player.vx -= 0.5;
-  if (keyIsDown(RIGHT_ARROW)) player.vx += 0.5;
-  player.vx *= 0.9;
-  player.x += player.vx;
-
-  if (keyIsDown(UP_ARROW) && onGround) {
-    player.vy = jumpVelocity;
-    onGround = false;
-  }
-  player.vy += gravity;
-  player.y += player.vy;
-
-  if (player.y >= groundY - player.radius) {
-    player.y = groundY - player.radius;
-    player.vy = 0;
-    onGround = true;
-  } else if (player.vy > 0) {
-    onGround = false;
-  }
-
-  for (let p of level.platforms) {
-    if (player.vy > 0 && 
-        player.y + player.radius > p.y && 
-        player.y - player.radius < p.y + p.height && 
-        player.x > p.x && 
-        player.x < p.x + p.width) {
-      player.y = p.y - player.radius;
+    if (keyIsDown(LEFT_ARROW)) player.vx -= 0.5;
+    if (keyIsDown(RIGHT_ARROW)) player.vx += 0.5;
+    player.vx *= 0.9;
+    player.x += player.vx;
+  
+    if (keyIsDown(UP_ARROW) && onGround) {
+      player.vy = jumpVelocity;
+      onGround = false;
+    }
+    player.vy += gravity;
+    player.y += player.vy;
+  
+    if (player.y >= groundY - player.radius) {
+      player.y = groundY - player.radius;
       player.vy = 0;
       onGround = true;
+    } else if (player.vy > 0) {
+      onGround = false;
     }
-  }
-
-  for (let c of level.components) {
-    if (overlap(player, c)) {
-      if (c.type === 'diode' && !c.paid) {
-        if (player.voltage >= c.toll) {
-          player.voltage -= c.toll;
-          c.paid = true;
-          level.barrier.lowered = true;
-        }
-      } else if (c.type === 'capacitor' && !c.charged) {
-        c.chargeLevel++;
-        if (c.chargeLevel >= c.chargeTime) {
-          c.charged = true;
-          level.ripple.current = max(0, level.ripple.current - c.rippleReduction);
-          if (currentLevel === 3 && c.isMain) {
-            player.voltage += 2.0;
-            level.charged = true;
+  
+    for (let p of level.platforms) {
+      if (player.vy > 0 && 
+          player.y + player.radius > p.y && 
+          player.y - player.radius < p.y + p.height && 
+          player.x > p.x && 
+          player.x < p.x + p.width) {
+        player.y = p.y - player.radius;
+        player.vy = 0;
+        onGround = true;
+      }
+    }
+  
+    for (let c of level.components) {
+      if (overlap(player, c)) {
+        if (c.type === 'diode' && !c.paid) {
+          if (player.voltage >= c.toll) {
+            player.voltage -= c.toll;
+            c.paid = true;
+            level.barrier.lowered = true;
           }
-        }
-      } else if (c.type === 'charger' && !level.adjusted) {
-        let rate = keyIsDown(SHIFT) ? 0.01 : 0.001;
-        if (keyIsDown(LEFT_ARROW)) {
-          c.current = max(0, c.current - rate);
-        }
-        if (keyIsDown(RIGHT_ARROW)) {
-          c.current = min(2.0, c.current + rate);
-        }
-        
-      } else if (c.type === 'cell') {
-        if (keyIsDown(CONTROL)) {
-          if (keyIsDown(UP_ARROW)) {
-            if (player.voltage > 0.1) {
+        } else if (c.type === 'capacitor' && !c.charged) {
+          c.chargeLevel++;
+          if (c.chargeLevel >= c.chargeTime) {
+            c.charged = true;
+            level.ripple.current = max(0, level.ripple.current - c.rippleReduction);
+            if (currentLevel === 3 && c.isMain) {
+              player.voltage += 2.0;
+              level.charged = true;
+            }
+          }
+        } else if (c.type === 'charger' && !level.adjusted) {
+          let rate = keyIsDown(SHIFT) ? 0.01 : 0.001;
+          if (keyIsDown(LEFT_ARROW)) {
+            c.current = max(0, c.current - rate); // Allow down to 0A
+          }
+          if (keyIsDown(RIGHT_ARROW)) {
+            c.current = min(2.0, c.current + rate);
+          }
+          // Remove the premature spacebar check here
+        } else if (c.type === 'cell') {
+          if (keyIsDown(CONTROL)) {
+            if (keyIsDown(UP_ARROW) && player.voltage > 0.1) {
               c.voltage += 0.1;
               player.voltage -= 0.1;
-            }
-          } else if (keyIsDown(DOWN_ARROW)) {
-            if (c.voltage > 0) {
+            } else if (keyIsDown(DOWN_ARROW) && c.voltage > 0) {
               c.voltage -= 0.1;
               player.voltage += 0.1;
             }
           }
+        } else if (c.type === 'resistor' && !c.paid) {
+          if (player.voltage >= c.toll) {
+            player.voltage -= c.toll;
+            c.paid = true;
+          }
         }
-      } else if (c.type === 'resistor' && !c.paid) {
-        if (player.voltage >= c.toll) {
-          player.voltage -= c.toll;
-          c.paid = true;
+      }
+    }
+  
+    if (currentLevel === 6) {
+      let cells = level.components.filter(c => c.type === 'cell');
+      if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
+          abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
+        level.balanced = true;
+      }
+    }
+  
+    player.x = constrain(player.x, player.radius, width * 2 - player.radius);
+  
+    // Check goal circle completion
+    let scaleX = width / 800;
+    let scaleY = height / 400;
+    let scale = min(scaleX, scaleY);
+    
+    let goalSize;
+    if (level.goalSizeMode === 'current') { // Charger level
+      let charger = level.components.find(c => c.type === 'charger');
+      if (charger) {
+        let difference = abs(charger.current - charger.targetCurrent);
+        let maxDifference = 0.2;
+        let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
+        goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor;
+      } else {
+        goalSize = level.goalCircle.baseSize;
+      }
+    } else { // Ripple-based levels
+      let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+      goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction;
+    }
+    goalSize *= scale;
+  
+    let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
+    let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
+    let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
+    let goalRadius = goalSize / 2;
+  
+    // Relaxed condition with debug feedback
+    if (distance + player.radius * scale < goalRadius) {
+      if (keyIsPressed && key === ' ') {
+        if (currentLevel === 1 || 
+            (currentLevel === 2 && level.barrier.lowered) || 
+            (currentLevel === 3 && level.charged) || 
+            (currentLevel === 4 && abs(level.components.find(c => c.type === 'charger').current - 1.125) < 0.01) || 
+            (currentLevel === 5 && level.charged) || 
+            (currentLevel === 6 && level.balanced) || 
+            (currentLevel === 7 && player.voltage >= level.minVoltage)) {
+          currentLevel++;
+          showIntro = true;
+          player.x = 50;
+          player.y = groundY - player.radius;
+          player.vx = 0;
+          player.vy = 0;
+          if (currentLevel <= levels.length) {
+            let nextLevel = levels[currentLevel - 1];
+            nextLevel.ripple.current = nextLevel.ripple.initial;
+            for (let c of nextLevel.components) {
+              if (c.type === 'capacitor') {
+                c.charged = false;
+                c.chargeLevel = 0;
+              }
+            }
+          }
+        } else if (currentLevel === 4) {
+          console.log("Current not close enough to 1.125A");
         }
       }
     }

@@ -53,7 +53,7 @@ let levels = [
   },
   {
     name: "BQ24133 Charger IC",
-    intro: "Adjust the charger's current to 1.125A. Charge capacitors to reduce ripple and grow the goal circle.",
+    intro: "Adjust the charger's current to 1.125A. The goal grows as you get closer to the target!",
     platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
     components: [
       { type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 },
@@ -61,7 +61,8 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalSizeMode: 'current',
     adjusted: false
   },
   {

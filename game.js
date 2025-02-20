@@ -24,7 +24,8 @@ let levels = [
       { type: 'capacitor', x: 500, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 }
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalSizeMode: 'ripple'
   },
   {
     name: "Schottky Diode",
@@ -37,7 +38,8 @@ let levels = [
     ],
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
+    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false },
+    goalSizeMode: 'ripple'
   },
   {
     name: "Capacitor",
@@ -49,7 +51,8 @@ let levels = [
     ],
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    charged: false
+    charged: false,
+    goalSizeMode: 'ripple'
   },
   {
     name: "BQ24133 Charger IC",
@@ -76,7 +79,8 @@ let levels = [
     ],
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    charged: false
+    charged: false,
+    goalSizeMode: 'ripple'
   },
   {
     name: "Battery Management System",
@@ -90,7 +94,8 @@ let levels = [
     ],
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    balanced: false
+    balanced: false,
+    goalSizeMode: 'ripple'
   },
   {
     name: "Load Path",
@@ -104,7 +109,8 @@ let levels = [
     ],
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    minVoltage: 5.0
+    minVoltage: 5.0,
+    goalSizeMode: 'ripple'
   }
 ];
 
@@ -226,9 +232,9 @@ function drawLevel(levelNum) {
          level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
-  // Goal Circle size calculation
+  // Goal Circle size calculation based on mode
   let goalSize;
-  if (levelNum === 4) { // Charger level
+  if (level.goalSizeMode === 'current') { // Charger level
     let charger = level.components.find(c => c.type === 'charger');
     if (charger) {
       let difference = abs(charger.current - charger.targetCurrent);
@@ -238,14 +244,21 @@ function drawLevel(levelNum) {
     } else {
       goalSize = level.goalCircle.baseSize; // Fallback
     }
-  } else {
-    // Regular ripple-based size calculation for other levels
+  } else if (level.goalSizeMode === 'ripple') { // Standard levels
     let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
     goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction;
+  } else {
+    goalSize = level.goalCircle.baseSize; // Fallback for undefined modes
   }
   goalSize *= scale; // Apply scaling
 
-  // Goal Circle drawing with visual feedback
+  // Player shake effect (always based on ripple)
+  let maxShake = 5;
+  let shakeAmount = (level.ripple.current / level.ripple.initial) * maxShake;
+  let shakeX = random(-shakeAmount, shakeAmount);
+  let shakeY = random(-shakeAmount, shakeAmount);
+
+  // Draw goal circle with visual feedback
   let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
   let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
@@ -259,11 +272,8 @@ function drawLevel(levelNum) {
   }
   ellipse(level.goalCircle.x * scaleX, level.goalCircle.y * scaleY, goalSize);
 
+  // Draw player with shake effect
   fill(0, 0, 255);
-  let maxShake = 5; // Maximum shake amount in pixels
-  let shakeAmount = (level.ripple.current / level.ripple.initial) * maxShake;
-  let shakeX = random(-shakeAmount, shakeAmount);
-  let shakeY = random(-shakeAmount, shakeAmount);
   ellipse(player.x * scaleX + shakeX, player.y * scaleY + shakeY, player.radius * 2 * scale);
 
   pop();
@@ -358,7 +368,7 @@ function updatePlayer(level) {
         if (keyIsDown(RIGHT_ARROW)) {
           c.current = min(2.0, c.current + rate);
         }
-        if (keyIsPressed && key === ' ') {
+        if (keyPressed && key === ' ') {
           if (abs(c.current - c.targetCurrent) < 0.01) {
             level.adjusted = true;
           }

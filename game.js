@@ -178,6 +178,30 @@ function drawLevel(levelNum) {
     rect(x, 0, 3, height);
   }
 
+  // === NEW LAYER: Large text for level concept ===
+push();
+translate(-cameraX * 0.35, 0);
+
+// Choose a text size that scales nicely:
+let bigTextSize = 120 * scale;  // Adjust to taste
+textSize(bigTextSize);
+textAlign(CENTER, CENTER);
+
+// Some semi-transparent fill so it doesn't obscure everything
+fill(0, 0, 0, 60);  
+
+// Example: Show the level's main name (Schottky Diode, Capacitor, etc.)
+// You could also show something else if you'd like!
+text(level.name, levelWidth / 2, height / 2);
+
+// Could optionally show a short descriptor:
+textSize(bigTextSize * 0.5);
+text(`Focus: ${level.name}`, levelWidth / 2, height / 2 + bigTextSize);
+
+// End new text layer
+pop();
+
+
   fill(180, 160, 100);
   for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
     rect(x, 0, 2, height);

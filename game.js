@@ -53,7 +53,7 @@ let levels = [
   },
   {
     name: "BQ24133 Charger IC",
-    intro: "Adjust the charger’s current to 1.125A. Charge capacitors to reduce ripple and grow the goal circle.",
+    intro: "Adjust the charger's current to 1.125A. Charge capacitors to reduce ripple and grow the goal circle.",
     platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
     components: [
       { type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 },
@@ -231,7 +231,8 @@ function drawLevel(levelNum) {
   ellipse(level.goalCircle.x * scaleX, level.goalCircle.y * scaleY, goalSize);
 
   fill(0, 0, 255);
-  let shakeAmount = level.ripple.current * 0.5;
+  let maxShake = 5; // Maximum shake amount in pixels
+  let shakeAmount = (level.ripple.current / level.ripple.initial) * maxShake;
   let shakeX = random(-shakeAmount, shakeAmount);
   let shakeY = random(-shakeAmount, shakeAmount);
   ellipse(player.x * scaleX + shakeX, player.y * scaleY + shakeY, player.radius * 2 * scale);

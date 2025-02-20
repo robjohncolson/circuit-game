@@ -12,39 +12,52 @@ let gravity = 0.5;
 let groundY = 380;
 let jumpVelocity = -12; // Ensures player can reach platforms
 let onGround = true;
+let showIntro = true; // Track if showing intro screen
 
 // Level definitions
 let levels = [
   { // Level 1: Input
+    name: "Input",
+    intro: "Welcome to your first power electronics challenge!",
     platforms: [],
     components: [],
     door: { x: 700, y: 300, width: 50, height: 100 }
   },
   { // Level 2: Schottky Diode
+    name: "Schottky Diode",
+    intro: "Learn about voltage drop across diodes",
     platforms: [{ x: 250, y: 340, width: 100, height: 20 }],
     components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3 }],
     door: { x: 700, y: 300, width: 50, height: 100 },
     barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
   },
   { // Level 3: Capacitor
+    name: "Capacitor",
+    intro: "Store and release electrical energy",
     platforms: [{ x: 400, y: 340, width: 100, height: 20 }],
     components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }],
     door: { x: 700, y: 300, width: 50, height: 100 },
     charged: false
   },
   { // Level 4: BQ24133 Charger IC
+    name: "BQ24133 Charger IC",
+    intro: "Adjust the charging current precisely",
     platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
     components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }],
     door: { x: 700, y: 300, width: 50, height: 100 },
     adjusted: false
   },
   { // Level 5: Lithium-Ion Cell
+    name: "Lithium-Ion Cell",
+    intro: "Charge a battery cell to its target voltage",
     platforms: [{ x: 350, y: 340, width: 100, height: 20 }],
     components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }],
     door: { x: 700, y: 300, width: 50, height: 100 },
     charged: false
   },
   { // Level 6: BMS
+    name: "Battery Management System",
+    intro: "Balance multiple cells to the same voltage",
     platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }],
     components: [
       { type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 },
@@ -54,6 +67,8 @@ let levels = [
     balanced: false
   },
   { // Level 7: Load Path
+    name: "Load Path",
+    intro: "Navigate through resistors while maintaining voltage",
     platforms: [{ x: 100, y: 340, width: 600, height: 20 }],
     components: [
       { type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0 },
@@ -70,15 +85,32 @@ function setup() {
 
 function draw() {
   background(220);
+  
   if (currentLevel === 0) {
     drawMenu();
   } else if (currentLevel > 0 && currentLevel <= levels.length) {
-    drawLevel(currentLevel);
+    let level = levels[currentLevel - 1];
+    if (showIntro) {
+      // Draw intro screen
+      textAlign(CENTER);
+      textSize(24);
+      fill(0);
+      text("Level " + currentLevel + ": " + level.name, width / 2, height / 2 - 20);
+      textSize(16);
+      text(level.intro, width / 2, height / 2);
+      text("Press Enter to continue", width / 2, height / 2 + 20);
+      if (keyIsPressed && keyCode === ENTER) {
+        showIntro = false;
+      }
+    } else {
+      drawLevel(currentLevel);
+    }
   } else {
+    // Game complete screen
     textAlign(CENTER);
     textSize(32);
     fill(0);
-    text("Game Complete", width / 2, height / 2);
+    text("Game Complete!", width / 2, height / 2);
   }
 }
 
@@ -304,6 +336,7 @@ function updatePlayer(level) {
         (currentLevel === 6 && level.balanced) || // BMS level
         (currentLevel === 7 && player.voltage >= level.minVoltage)) { // Load level
       currentLevel++;
+      showIntro = true; // Show intro for next level
       player.x = 50;
       player.y = groundY - player.radius;
       player.vx = 0;
@@ -315,6 +348,9 @@ function updatePlayer(level) {
 function keyPressed() {
   if (currentLevel === 0 && keyCode === ENTER) {
     currentLevel = 1;
+    showIntro = true;
+  } else if (showIntro && keyCode === ENTER) {
+    showIntro = false;
   } else if (currentLevel > 0) {
     let level = levels[currentLevel - 1];
     if (keyCode === 32) { // Spacebar

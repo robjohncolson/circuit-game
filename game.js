@@ -436,7 +436,7 @@ function updatePlayer(level) {
   let goalRadius = goalSize / 2; // Half of the goal circle's diameter
 
   let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
-  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleX };
+  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
 
   // Relaxed condition: Allow partial overlap

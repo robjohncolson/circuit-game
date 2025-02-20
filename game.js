@@ -362,15 +362,20 @@ function updatePlayer(level) {
 
   player.x = constrain(player.x, player.radius, width * 2 - player.radius);
 
+  // Check goal circle completion
   let scaleX = width / 800;
   let scaleY = height / 400;
   let scale = min(scaleX, scaleY);
   let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
   let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
-  let scaledPlayer = { x: player.x * scaleX, y: player.y * scaleY, radius: player.radius * scale };
-  let scaledGoal = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY, radius: goalSize / 2 };
+  
+  let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
+  let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
+  let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
+  let goalRadius = goalSize / 2;
 
-  if (circleOverlap(scaledPlayer, scaledGoal)) {
+  if (distance + player.radius * scale < goalRadius && keyIsPressed && key === ' ') {
+    // Player is completely inside and pressed spacebar
     if (currentLevel === 1 || 
         (currentLevel === 2 && level.barrier.lowered) || 
         (currentLevel === 3 && level.charged) || 
@@ -384,6 +389,7 @@ function updatePlayer(level) {
       player.y = groundY - player.radius;
       player.vx = 0;
       player.vy = 0;
+      // Reset ripple and capacitors for the next level
       if (currentLevel <= levels.length) {
         let nextLevel = levels[currentLevel - 1];
         nextLevel.ripple.current = nextLevel.ripple.initial;

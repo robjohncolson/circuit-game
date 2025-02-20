@@ -1,4 +1,3 @@
-// Global game variables
 let currentLevel = 0;
 let player = { 
   x: 50, 
@@ -13,9 +12,8 @@ let groundY = 380;
 let jumpVelocity = -12;
 let onGround = true;
 let showIntro = true;
-let cameraX = 0; // Smoothed camera position
+let cameraX = 0;
 
-// Level definitions with detailed intros
 let levels = [
   {
     name: "Input",
@@ -28,12 +26,85 @@ let levels = [
     ripple: { initial: 10, current: 10 },
     goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 }
   },
-  { name: "Schottky Diode", intro: "Encounter a Schottky Diode, which allows current in one direction but drops voltage. Pay 0.3V to lower the barrier and reach the door!", platforms: [{ x: 250, y: 340, width: 100, height: 20 }], components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false } },
-  { name: "Capacitor", intro: "Capacitors store energy. Stand on the capacitor until it's fully charged (green) to gain 2V, then proceed to the door.", platforms: [{ x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
-  { name: "BQ24133 Charger IC", intro: "Adjust the BQ24133 Charger IC's current to 1.125A using left/right arrow keys. When within ±0.01A, proceed to the door.", platforms: [{ x: 300, y: 340, width: 100, height: 20 }], components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, adjusted: false },
-  { name: "Lithium-Ion Cell", intro: "Charge the lithium-ion cell to 4.2V by standing on it. Transfer voltage until it's full, then head to the door.", platforms: [{ x: 350, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
-  { name: "Battery Management System", intro: "Balance two cells to 4.0V each. Stand on a cell and press Space to transfer voltage, keeping at least 5V for yourself. Then reach the door.", platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 }, { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 }], door: { x: 700, y: 300, width: 50, height: 100 }, balanced: false },
-  { name: "Load Path", intro: "Navigate past resistors that drain 1V each. Reach the door with at least 5V to power the load and win!", platforms: [{ x: 100, y: 340, width: 600, height: 20 }], components: [{ type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0, paid: false }, { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, minVoltage: 5.0 }
+  {
+    name: "Schottky Diode",
+    intro: "Pay 0.3V at the diode to lower the barrier. Charge capacitors to reduce ripple and grow the goal circle!",
+    platforms: [{ x: 250, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3, paid: false },
+      { type: 'capacitor', x: 100, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
+  },
+  {
+    name: "Capacitor",
+    intro: "Charge the main capacitor to gain 2V. Use additional capacitors to reduce ripple and grow the goal circle.",
+    platforms: [{ x: 400, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5, isMain: true },
+      { type: 'capacitor', x: 200, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    charged: false
+  },
+  {
+    name: "BQ24133 Charger IC",
+    intro: "Adjust the charger’s current to 1.125A. Charge capacitors to reduce ripple and grow the goal circle.",
+    platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 },
+      { type: 'capacitor', x: 100, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    adjusted: false
+  },
+  {
+    name: "Lithium-Ion Cell",
+    intro: "Charge the cell to 4.2V. Use capacitors to reduce ripple and grow the goal circle.",
+    platforms: [{ x: 350, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 },
+      { type: 'capacitor', x: 100, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    charged: false
+  },
+  {
+    name: "Battery Management System",
+    intro: "Balance cells to 4.0V each with Space. Charge capacitors to reduce ripple and grow the goal circle.",
+    platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 },
+      { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 },
+      { type: 'capacitor', x: 100, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    balanced: false
+  },
+  {
+    name: "Load Path",
+    intro: "Reach the goal with 5V after resistors drain 1V each. Charge capacitors to reduce ripple.",
+    platforms: [{ x: 100, y: 340, width: 600, height: 20 }],
+    components: [
+      { type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0, paid: false },
+      { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0, paid: false },
+      { type: 'capacitor', x: 100, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
+      { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
+    ],
+    ripple: { initial: 10, current: 10 },
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
+    minVoltage: 5.0
+  }
 ];
 
 function setup() {
@@ -89,37 +160,30 @@ function drawLevel(levelNum) {
   let scaleY = height / 400;
   let scale = min(scaleX, scaleY);
 
-  // Smooth camera movement
   let targetCameraX = constrain(player.x * scaleX - width / 2, 0, levelWidth - width);
   cameraX = lerp(cameraX, targetCameraX, 0.1);
 
-  // Draw distant layer (moving at 20% of camera speed)
   fill(120, 100, 50);
   for (let x = -cameraX * 0.2; x < levelWidth; x += 50) {
     rect(x, 0, 3, height);
   }
 
-  // Draw mid layer (moving at 50% of camera speed)
   fill(180, 160, 100);
   for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
     rect(x, 0, 2, height);
   }
 
-  // Draw game elements
   push();
   translate(-cameraX, 0);
 
-  // Ground
   fill(139, 69, 19);
   rect(0, groundY * scaleY, levelWidth, height - groundY * scaleY);
 
-  // Platforms
   for (let p of level.platforms) {
     fill(100);
     rect(p.x * scaleX, p.y * scaleY, p.width * scaleX, p.height * scaleY);
   }
 
-  // Components
   for (let c of level.components) {
     let scaledX = c.x * scaleX;
     let scaledY = c.y * scaleY;
@@ -155,20 +219,17 @@ function drawLevel(levelNum) {
     }
   }
 
-  // Barrier if present
   if (level.barrier && !level.barrier.lowered) {
     fill(255, 0, 0);
     rect(level.barrier.x * scaleX, level.barrier.y * scaleY, 
          level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
-  // Goal Circle
   let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
   let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
-  fill(0, 255, 0); // Green
+  fill(0, 255, 0);
   ellipse(level.goalCircle.x * scaleX, level.goalCircle.y * scaleY, goalSize);
 
-  // Player with shake effect
   fill(0, 0, 255);
   let shakeAmount = level.ripple.current * 0.5;
   let shakeX = random(-shakeAmount, shakeAmount);
@@ -177,14 +238,12 @@ function drawLevel(levelNum) {
 
   pop();
 
-  // HUD
   textAlign(LEFT);
   textSize(16 * scale);
   fill(0);
   text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20 * scaleY);
   text("Ripple: " + level.ripple.current.toFixed(1), 10, 40 * scaleY);
   
-  // Level-specific instructions
   if (levelNum === 1) {
     text("Jump through the goal circle!", 10, 60 * scaleY);
   } else if (levelNum === 2) {
@@ -251,7 +310,7 @@ function updatePlayer(level) {
         if (c.chargeLevel >= c.chargeTime) {
           c.charged = true;
           level.ripple.current = max(0, level.ripple.current - c.rippleReduction);
-          if (currentLevel === 3 && c.isMain) { // Capacitor level main task
+          if (currentLevel === 3 && c.isMain) {
             player.voltage += 2.0;
             level.charged = true;
           }
@@ -299,7 +358,6 @@ function updatePlayer(level) {
 
   player.x = constrain(player.x, player.radius, width * 2 - player.radius);
 
-  // Check goal circle overlap
   let scaleX = width / 800;
   let scaleY = height / 400;
   let scale = min(scaleX, scaleY);
@@ -322,7 +380,6 @@ function updatePlayer(level) {
       player.y = groundY - player.radius;
       player.vx = 0;
       player.vy = 0;
-      // Reset ripple and capacitors for the next level
       if (currentLevel <= levels.length) {
         let nextLevel = levels[currentLevel - 1];
         nextLevel.ripple.current = nextLevel.ripple.initial;

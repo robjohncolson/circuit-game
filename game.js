@@ -18,9 +18,9 @@ let showIntro = true;
 let levels = [
   { name: "Input", intro: "Welcome to Coulomb's Odyssey! Guide a coulomb of charge through a power electronics system. Your goal is to reach the red door to proceed.", platforms: [], components: [], door: { x: 700, y: 300, width: 50, height: 100 } },
   { name: "Schottky Diode", intro: "Encounter a Schottky Diode, which allows current in one direction but drops voltage. Pay 0.3V to lower the barrier and reach the door!", platforms: [{ x: 250, y: 340, width: 100, height: 20 }], components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false } },
-  { name: "Capacitor", intro: "Capacitors store energy. Stand on the capacitor until it’s fully charged (green) to gain 2V, then proceed to the door.", platforms: [{ x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
-  { name: "BQ24133 Charger IC", intro: "Adjust the BQ24133 Charger IC’s current to 1.125A using left/right arrow keys. When within ±0.01A, proceed to the door.", platforms: [{ x: 300, y: 340, width: 100, height: 20 }], components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, adjusted: false },
-  { name: "Lithium-Ion Cell", intro: "Charge the lithium-ion cell to 4.2V by standing on it. Transfer voltage until it’s full, then head to the door.", platforms: [{ x: 350, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
+  { name: "Capacitor", intro: "Capacitors store energy. Stand on the capacitor until it's fully charged (green) to gain 2V, then proceed to the door.", platforms: [{ x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
+  { name: "BQ24133 Charger IC", intro: "Adjust the BQ24133 Charger IC's current to 1.125A using left/right arrow keys. When within ±0.01A, proceed to the door.", platforms: [{ x: 300, y: 340, width: 100, height: 20 }], components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }], door: { x: 700, y: 300, width: 50, height: 100 }, adjusted: false },
+  { name: "Lithium-Ion Cell", intro: "Charge the lithium-ion cell to 4.2V by standing on it. Transfer voltage until it's full, then head to the door.", platforms: [{ x: 350, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }], door: { x: 700, y: 300, width: 50, height: 100 }, charged: false },
   { name: "Battery Management System", intro: "Balance two cells to 4.0V each. Stand on a cell and press Space to transfer voltage, keeping at least 5V for yourself. Then reach the door.", platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }], components: [{ type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 }, { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 }], door: { x: 700, y: 300, width: 50, height: 100 }, balanced: false },
   { name: "Load Path", intro: "Navigate past resistors that drain 1V each. Reach the door with at least 5V to power the load and win!", platforms: [{ x: 100, y: 340, width: 600, height: 20 }], components: [{ type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0, paid: false }, { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0, paid: false }], door: { x: 700, y: 300, width: 50, height: 100 }, minVoltage: 5.0 }
 ];
@@ -69,16 +69,18 @@ function drawMenu() {
 
 function drawLevel(levelNum) {
   let level = levels[levelNum - 1];
-  let cameraX = player.x - width / 2; // Allow negative values for parallax
+  let cameraX = player.x - width / 2;
 
-  // Parallax background layers
-  fill(184, 134, 11);
-  for (let x = -cameraX * 0.2; x < width * 2; x += 100) {
-    rect(x, 0, 5, height);
+  // Distant layer (slower movement)
+  fill(184, 134, 11); // Dark goldenrod color
+  for (let x = -cameraX * 0.2; x < width * 2; x += 20) {
+    rect(x, 0, 2, height); // Thin lines, 20 pixels apart
   }
-  fill(150);
-  for (let x = -cameraX * 0.5; x < width * 2; x += 50) {
-    rect(x, 0, 3, height);
+
+  // Mid layer (faster movement)
+  fill(150); // Gray color
+  for (let x = -cameraX * 0.5; x < width * 2; x += 10) {
+    rect(x, 0, 1, height); // Thinner lines, 10 pixels apart
   }
 
   push();

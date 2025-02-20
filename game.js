@@ -173,39 +173,30 @@ function drawLevel(levelNum) {
   let targetCameraX = constrain(player.x * scaleX - width / 2, 0, levelWidth - width);
   cameraX = lerp(cameraX, targetCameraX, 0.1);
 
-  fill(120, 100, 50);
-  for (let x = -cameraX * 0.2; x < levelWidth; x += 50) {
-    rect(x, 0, 3, height);
-  }
+  // Far background (factor 0.2)
+fill(120, 100, 50);
+for (let x = -cameraX * 0.2; x < levelWidth; x += 50) {
+  rect(x, 0, 3, height);
+}
 
-  // === NEW LAYER: Large text for level concept ===
+// Large text on far background
 push();
-translate(-cameraX * 0.35, 0);
+translate(-cameraX * 0.2, 0);  // same parallax as far background
 
-// Choose a text size that scales nicely:
-let bigTextSize = 120 * scale;  // Adjust to taste
-textSize(bigTextSize);
 textAlign(CENTER, CENTER);
+textSize(120 * scale);
+fill(0, 0, 0, 60);
 
-// Some semi-transparent fill so it doesn't obscure everything
-fill(0, 0, 0, 60);  
+// Instead of using levelWidth/2, use a smaller fraction (25% for instance)
+text(level.name, levelWidth * 0.25, height / 2);
 
-// Example: Show the level's main name (Schottky Diode, Capacitor, etc.)
-// You could also show something else if you'd like!
-text(level.name, levelWidth / 2, height / 2);
-
-// Could optionally show a short descriptor:
-textSize(bigTextSize * 0.5);
-text(`Focus: ${level.name}`, levelWidth / 2, height / 2 + bigTextSize);
-
-// End new text layer
 pop();
 
-
-  fill(180, 160, 100);
-  for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
-    rect(x, 0, 2, height);
-  }
+// Mid background (factor 0.5)
+fill(180, 160, 100);
+for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
+  rect(x, 0, 2, height);
+}
 
   push();
   translate(-cameraX, 0);
@@ -394,11 +385,7 @@ function updatePlayer(level) {
         if (keyIsDown(RIGHT_ARROW)) {
           c.current = min(2.0, c.current + rate);
         }
-        if (keyPressed && key === ' ') {
-          if (abs(c.current - c.targetCurrent) < 0.01) {
-            level.adjusted = true;
-          }
-        }
+        
       } else if (c.type === 'cell') {
         if (keyIsDown(CONTROL)) {
           if (keyIsDown(UP_ARROW)) {

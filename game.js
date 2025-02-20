@@ -255,17 +255,16 @@ function updatePlayer(level) {
           level.charged = true;
         }
       } else if (c.type === 'charger' && !level.adjusted) {
-        // Charger current adjustment
+        // Charger current adjustment with finer control
         if (keyIsDown(LEFT_ARROW)) {
-          c.current = max(0.5, c.current - 0.01);
+          c.current = max(0.5, c.current - 0.001);
         }
         if (keyIsDown(RIGHT_ARROW)) {
-          c.current = min(2.0, c.current + 0.01);
+          c.current = min(2.0, c.current + 0.001);
         }
-        if (keyIsDown(32)) { // Space key
-          if (abs(c.current - c.targetCurrent) < 0.01) {
-            level.adjusted = true;
-          }
+        // Automatically detect when current matches target
+        if (abs(c.current - c.targetCurrent) < 0.01) {
+          level.adjusted = true;
         }
       } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0) {
         // Cell charging

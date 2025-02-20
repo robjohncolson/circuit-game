@@ -242,10 +242,10 @@ function updatePlayer(level) {
           c.paid = true;
           level.barrier.lowered = true;
         }
-      } else if (c.type === 'capacitor' && c.chargeLevel < c.chargeTime) {
+      } else if (c.type === 'capacitor' && !level.charged) {
         c.chargeLevel++;
         if (c.chargeLevel >= c.chargeTime) {
-          player.voltage += 2.0; // Bonus voltage for charging
+          player.voltage += 2.0; // Gain voltage
           level.charged = true;
         }
       } else if (c.type === 'charger' && !level.adjusted) {

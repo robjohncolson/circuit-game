@@ -225,12 +225,29 @@ function drawLevel(levelNum) {
          level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
-  // Goal Circle with visual feedback
+  // Goal Circle size calculation
+  let goalSize;
+  if (levelNum === 4) { // Charger level
+    let charger = level.components.find(c => c.type === 'charger');
+    if (charger) {
+      let difference = abs(charger.current - charger.targetCurrent);
+      let maxDifference = 0.2; // Goal grows/shrinks within ±0.2A of target
+      let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
+      goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor;
+    } else {
+      goalSize = level.goalCircle.baseSize; // Fallback
+    }
+  } else {
+    // Regular ripple-based size calculation for other levels
+    let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+    goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction;
+  }
+  goalSize *= scale; // Apply scaling
+
+  // Goal Circle drawing with visual feedback
   let playerCenter = { x: player.x * scaleX, y: player.y * scaleY };
   let goalCenter = { x: level.goalCircle.x * scaleX, y: level.goalCircle.y * scaleY };
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
-  let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
-  let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
   let goalRadius = goalSize / 2;
 
   if (distance + player.radius * scale < goalRadius) {

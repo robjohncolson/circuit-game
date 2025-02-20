@@ -251,24 +251,24 @@ for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
   }
 
   // Goal Circle size calculation based on mode
-  let goalSize;
-  if (level.goalSizeMode === 'current') { // Charger level
-    let charger = level.components.find(c => c.type === 'charger');
-    if (charger) {
-      let difference = abs(charger.current - charger.targetCurrent);
-      let maxDifference = 0.2; // Goal grows/shrinks within ±0.2A of target
-      let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
-      goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor) * scale;
-    } else {
-      goalSize = level.goalCircle.baseSize * scale; // Fallback
-    }
-  } else if (level.goalSizeMode === 'ripple') { // Standard levels
-    let rippleFraction = Math.max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
-    goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
+  // In drawLevel function
+let goalSize;
+if (level.goalSizeMode === 'current') {
+  let charger = level.components.find(c => c.type === 'charger');
+  if (charger) {
+    let difference = abs(charger.current - charger.targetCurrent);
+    let maxDifference = 0.2;
+    let sizeFactor = constrain(1 - (difference / maxDifference), 0, 1);
+    goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * sizeFactor;
+    // Ensure maxSize is correctly set to 30 (player size + 50%)
   } else {
-    goalSize = level.goalCircle.baseSize * scale; // Fallback for undefined modes
+    goalSize = level.goalCircle.baseSize;
   }
-
+} else {
+  let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+  goalSize = level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction;
+}
+goalSize *= scale;
   // Player shake effect (always based on ripple)
   let maxShake = 5;
   let shakeAmount = (level.ripple.current / level.ripple.initial) * maxShake;

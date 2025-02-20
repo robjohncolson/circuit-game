@@ -260,12 +260,17 @@ function updatePlayer(level) {
         if (abs(c.current - c.targetCurrent) < 0.01) {
           level.adjusted = true;
         }
-      } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0) {
-        // Cell charging
-        c.voltage = min(c.targetVoltage, c.voltage + 0.1);
-        player.voltage = max(0, player.voltage - 0.1);
-        if (c.voltage >= c.targetVoltage) {
-          level.charged = true;
+      } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0.1) {
+        // Cell charging with minimum voltage protection
+        if (currentLevel === 6 && keyIsPressed && key === ' ') {
+          c.voltage = min(c.targetVoltage, c.voltage + 0.1);
+          player.voltage -= 0.1;
+        } else if (currentLevel === 5) { // Regular cell charging level
+          c.voltage = min(c.targetVoltage, c.voltage + 0.1);
+          player.voltage = max(0.1, player.voltage - 0.1);
+          if (c.voltage >= c.targetVoltage) {
+            level.charged = true;
+          }
         }
       } else if (c.type === 'resistor' && !c.paid) {
         if (player.voltage >= c.toll) {
@@ -276,18 +281,10 @@ function updatePlayer(level) {
     }
   }
 
-  // BMS balancing (Level 6)
+  // BMS balancing check (Level 6)
   if (currentLevel === 6) {
     let cells = level.components;
-    if (overlap(player, cells[0]) && keyIsDown(32) && player.voltage > 0) {
-      cells[0].voltage = min(cells[0].targetVoltage, cells[0].voltage + 0.1);
-      player.voltage = max(0, player.voltage - 0.1);
-    }
-    if (overlap(player, cells[1]) && keyIsDown(32) && player.voltage > 0) {
-      cells[1].voltage = min(cells[1].targetVoltage, cells[1].voltage + 0.1);
-      player.voltage = max(0, player.voltage - 0.1);
-    }
-    // Check if cells are balanced
+    // Check if cells are balanced at target voltage
     if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
         abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
       level.balanced = true;

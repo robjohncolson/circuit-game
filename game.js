@@ -327,17 +327,18 @@ function updatePlayer(level) {
         if (abs(c.current - c.targetCurrent) < 0.01) {
           level.adjusted = true;
         }
-      } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0.1) {
-        if (currentLevel === 6 && keyIsPressed && key === ' ') {
-          if (player.voltage > 5.1) {
-            c.voltage = min(c.targetVoltage, c.voltage + 0.1);
-            player.voltage -= 0.1;
-          }
-        } else if (currentLevel === 5) {
-          c.voltage = min(c.targetVoltage, c.voltage + 0.1);
-          player.voltage = max(0.1, player.voltage - 0.1);
-          if (c.voltage >= c.targetVoltage) {
-            level.charged = true;
+      } else if (c.type === 'cell') {
+        if (keyIsDown(CONTROL)) {
+          if (keyIsDown(UP_ARROW)) {
+            if (player.voltage > 0.1) {
+              c.voltage += 0.1;
+              player.voltage -= 0.1;
+            }
+          } else if (keyIsDown(DOWN_ARROW)) {
+            if (c.voltage > 0) {
+              c.voltage -= 0.1;
+              player.voltage += 0.1;
+            }
           }
         }
       } else if (c.type === 'resistor' && !c.paid) {

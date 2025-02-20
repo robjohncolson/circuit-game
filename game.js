@@ -218,14 +218,15 @@ function updatePlayer(level) {
           level.charged = true;
         }
       } else if (c.type === 'charger' && !level.adjusted) {
+        let rate = keyIsDown(SHIFT) ? 0.01 : 0.001; // Turbo mode with Shift
         if (keyIsDown(LEFT_ARROW)) {
-          c.current = max(0.5, c.current - 0.001);
+          c.current = max(0.5, c.current - rate); // Lower limit at 0.5A
         }
         if (keyIsDown(RIGHT_ARROW)) {
-          c.current = min(2.0, c.current + 0.001);
+          c.current = min(2.0, c.current + rate); // Upper limit at 2.0A
         }
         if (abs(c.current - c.targetCurrent) < 0.01) {
-          level.adjusted = true;
+          level.adjusted = true; // Success!
         }
       } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0.1) {
         if (currentLevel === 6 && keyIsPressed && key === ' ') {

@@ -17,7 +17,7 @@ let cameraX = 0;
 let levels = [
   {
     name: "Input",
-    intro: "Welcome to Coulomb's Odyssey! Reduce ripple by charging capacitors to grow the goal circle, then jump through to proceed.",
+    intro: "Welcome to Coulomb's Odyssey! Reduce ripple by charging capacitors to grow the goal circle!",
     platforms: [],
     components: [
       { type: 'capacitor', x: 200, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 },
@@ -37,22 +37,22 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false },
-    goalSizeMode: 'ripple'
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalSizeMode: 'ripple',
+    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
   },
   {
     name: "Capacitor",
-    intro: "Charge the main capacitor to gain 2V. Use additional capacitors to reduce ripple and grow the goal circle.",
+    intro: "Charge the main capacitor to gain 2V. Use additional capacitors to reduce ripple and grow the goal circle!",
     platforms: [{ x: 400, y: 340, width: 100, height: 20 }],
     components: [
       { type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5, isMain: true },
       { type: 'capacitor', x: 200, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    charged: false,
-    goalSizeMode: 'ripple'
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalSizeMode: 'ripple',
+    charged: false
   },
   {
     name: "BQ24133 Charger IC",
@@ -70,7 +70,7 @@ let levels = [
   },
   {
     name: "Lithium-Ion Cell",
-    intro: "Charge the cell to 4.2V. Use capacitors to reduce ripple and grow the goal circle.",
+    intro: "Charge the cell to 4.2V. Use capacitors to reduce ripple and grow the goal circle!",
     platforms: [{ x: 350, y: 340, width: 100, height: 20 }],
     components: [
       { type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 },
@@ -78,9 +78,9 @@ let levels = [
       { type: 'capacitor', x: 600, y: 350, width: 50, height: 30, chargeTime: 180, chargeLevel: 0, charged: false, rippleReduction: 5 }
     ],
     ripple: { initial: 10, current: 10 },
-    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 50 },
-    charged: false,
-    goalSizeMode: 'ripple'
+    goalCircle: { x: 700, y: 300, baseSize: 5, maxSize: 22 },
+    goalSizeMode: 'ripple',
+    charged: false
   },
   {
     name: "Battery Management System",

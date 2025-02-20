@@ -18,20 +18,50 @@ let levels = [
   { // Level 1: Input
     platforms: [],
     components: [],
-    door: {x: 700, y: 300, width: 50, height: 100},
+    door: { x: 700, y: 300, width: 50, height: 100 }
   },
   { // Level 2: Schottky Diode
-    platforms: [{x: 250, y: 340, width: 100, height: 20}], // Platform at reachable height
-    components: [{type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3}],
-    door: {x: 700, y: 300, width: 50, height: 100},
-    barrier: {x: 500, y: 350, width: 20, height: 100, lowered: false},
+    platforms: [{ x: 250, y: 340, width: 100, height: 20 }],
+    components: [{ type: 'diode', x: 300, y: 290, width: 50, height: 50, toll: 0.3 }],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    barrier: { x: 500, y: 350, width: 20, height: 100, lowered: false }
   },
   { // Level 3: Capacitor
-    platforms: [{x: 400, y: 340, width: 100, height: 20}],
-    components: [{type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0}],
-    door: {x: 700, y: 300, width: 50, height: 100},
-    charged: false,
+    platforms: [{ x: 400, y: 340, width: 100, height: 20 }],
+    components: [{ type: 'capacitor', x: 400, y: 290, width: 100, height: 50, chargeTime: 180, chargeLevel: 0 }],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    charged: false
   },
+  { // Level 4: BQ24133 Charger IC
+    platforms: [{ x: 300, y: 340, width: 100, height: 20 }],
+    components: [{ type: 'charger', x: 350, y: 290, width: 50, height: 50, targetCurrent: 1.125, current: 0 }],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    adjusted: false
+  },
+  { // Level 5: Lithium-Ion Cell
+    platforms: [{ x: 350, y: 340, width: 100, height: 20 }],
+    components: [{ type: 'cell', x: 350, y: 290, width: 50, height: 50, voltage: 0, targetVoltage: 4.2 }],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    charged: false
+  },
+  { // Level 6: BMS
+    platforms: [{ x: 200, y: 340, width: 100, height: 20 }, { x: 400, y: 340, width: 100, height: 20 }],
+    components: [
+      { type: 'cell', x: 200, y: 290, width: 50, height: 50, voltage: 3.8, targetVoltage: 4.0 },
+      { type: 'cell', x: 400, y: 290, width: 50, height: 50, voltage: 4.2, targetVoltage: 4.0 }
+    ],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    balanced: false
+  },
+  { // Level 7: Load Path
+    platforms: [{ x: 100, y: 340, width: 600, height: 20 }],
+    components: [
+      { type: 'resistor', x: 250, y: 290, width: 50, height: 50, toll: 1.0 },
+      { type: 'resistor', x: 450, y: 290, width: 50, height: 50, toll: 1.0 }
+    ],
+    door: { x: 700, y: 300, width: 50, height: 100 },
+    minVoltage: 5.0
+  }
 ];
 
 function setup() {

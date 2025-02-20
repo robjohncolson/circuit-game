@@ -178,6 +178,7 @@ function drawLevel(levelNum) {
   textSize(16);
   fill(0);
   text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20);
+  
   if (levelNum === 1) {
     text("Reach the door!", 10, 40);
   } else if (levelNum === 2) {
@@ -187,6 +188,14 @@ function drawLevel(levelNum) {
     if (level.charged) {
       text("Charged! Proceed to the door.", 10, 60);
     }
+  } else if (levelNum === 4) {
+    text("Adjust current to 1.125A, then press Space!", 10, 40);
+  } else if (levelNum === 5) {
+    text("Stand on the cell to charge it to 4.2V!", 10, 40);
+  } else if (levelNum === 6) {
+    text("Balance both cells to 4.0V!", 10, 40);
+  } else if (levelNum === 7) {
+    text("Reach the load with at least 5V!", 10, 40);
   }
 
   // Update player and game logic (unchanged)

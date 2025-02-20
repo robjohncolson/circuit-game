@@ -325,3 +325,10 @@ function overlap(obj1, obj2) {
   let distanceY = player.y - closestY;
   return (distanceX * distanceX + distanceY * distanceY) < (player.radius * player.radius);
 }
+
+function circleOverlap(circle1, circle2) {
+  let dx = circle1.x - circle2.x;
+  let dy = circle1.y - circle2.y;
+  let distance = sqrt(dx * dx + dy * dy);
+  return distance < (circle1.radius + circle2.radius);
+}

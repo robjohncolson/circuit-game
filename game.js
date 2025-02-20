@@ -264,7 +264,12 @@ function drawLevel(levelNum) {
     text("Stand on the main capacitor to charge!", 10, 60 * scaleY);
     if (level.charged) text("Charged! Jump through the goal.", 10, 80 * scaleY);
   } else if (levelNum === 4) {
-    text("Adjust current to 1.125A with arrow keys!", 10, 60 * scaleY);
+    let charger = level.components.find(c => c.type === 'charger');
+    if (charger) {
+      text("Current: " + charger.current.toFixed(3) + "A", 10, 60 * scaleY);
+      text("Target: 1.125A", 10, 80 * scaleY);
+      text("Use arrows to adjust, SHIFT for faster, SPACE to confirm", 10, 100 * scaleY);
+    }
   } else if (levelNum === 5) {
     text("Stand on the cell to charge it to 4.2V!", 10, 60 * scaleY);
   } else if (levelNum === 6) {

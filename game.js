@@ -96,21 +96,15 @@ function drawLevel(levelNum) {
   let cameraX = constrain(player.x - width / 2, 0, width); // Camera follows player
 
   // Parallax background layers with vertical lines
-  push();
-  translate(-cameraX * 0.2, 0);
   fill(184, 134, 11);
-  for (let x = 0; x < width * 2; x += 100) {
-    rect(x, 0, 5, height);
+  for (let x = -cameraX * 0.2; x < width * 2; x += 100) {
+    rect(x, 0, 5, height); // Background moves at 20% of player speed
   }
-  pop();
 
-  push();
-  translate(-cameraX * 0.5, 0);
   fill(150);
-  for (let x = 0; x < width * 2; x += 50) {
-    rect(x, 0, 3, height);
+  for (let x = -cameraX * 0.5; x < width * 2; x += 50) {
+    rect(x, 0, 3, height); // Midground moves at 50% of player speed
   }
-  pop();
 
   // Draw game world with camera offset
   push();

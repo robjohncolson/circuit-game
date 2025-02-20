@@ -200,15 +200,10 @@ function drawLevel(levelNum) {
 
   // Update player and game logic (unchanged)
   updatePlayer(level);
-  if (levelNum === 3 && overlap(player, level.components[0])) {
-    level.components[0].chargeLevel = min(level.components[0].chargeLevel + 1, level.components[0].chargeTime);
-    if (level.components[0].chargeLevel >= level.components[0].chargeTime) {
-      level.charged = true;
-    }
-  }
 }
 
 function updatePlayer(level) {
+  // Movement controls
   if (keyIsDown(LEFT_ARROW)) player.vx -= 0.5;
   if (keyIsDown(RIGHT_ARROW)) player.vx += 0.5;
   player.vx *= 0.9; // Friction
@@ -244,8 +239,87 @@ function updatePlayer(level) {
     }
   }
 
+  // Component interactions
+  for (let c of level.components) {
+    if (overlap(player, c)) {
+      if (c.type === 'diode' && !c.paid) {
+        if (player.voltage >= c.toll) {
+          player.voltage -= c.toll;
+          c.paid = true;
+          level.barrier.lowered = true;
+        }
+      } else if (c.type === 'capacitor' && c.chargeLevel < c.chargeTime) {
+        c.chargeLevel++;
+        if (c.chargeLevel >= c.chargeTime) {
+          player.voltage += 2.0; // Bonus voltage for charging
+          level.charged = true;
+        }
+      } else if (c.type === 'charger' && !level.adjusted) {
+        // Charger current adjustment
+        if (keyIsDown(LEFT_ARROW)) {
+          c.current = max(0.5, c.current - 0.01);
+        }
+        if (keyIsDown(RIGHT_ARROW)) {
+          c.current = min(2.0, c.current + 0.01);
+        }
+        if (keyIsDown(32)) { // Space key
+          if (abs(c.current - c.targetCurrent) < 0.01) {
+            level.adjusted = true;
+          }
+        }
+      } else if (c.type === 'cell' && c.voltage < c.targetVoltage && player.voltage > 0) {
+        // Cell charging
+        c.voltage = min(c.targetVoltage, c.voltage + 0.1);
+        player.voltage = max(0, player.voltage - 0.1);
+        if (c.voltage >= c.targetVoltage) {
+          level.charged = true;
+        }
+      } else if (c.type === 'resistor' && !c.paid) {
+        if (player.voltage >= c.toll) {
+          player.voltage -= c.toll;
+          c.paid = true;
+        }
+      }
+    }
+  }
+
+  // BMS balancing (Level 6)
+  if (currentLevel === 6) {
+    let cells = level.components;
+    if (overlap(player, cells[0]) && keyIsDown(32) && player.voltage > 0) {
+      cells[0].voltage = min(cells[0].targetVoltage, cells[0].voltage + 0.1);
+      player.voltage = max(0, player.voltage - 0.1);
+    }
+    if (overlap(player, cells[1]) && keyIsDown(32) && player.voltage > 0) {
+      cells[1].voltage = min(cells[1].targetVoltage, cells[1].voltage + 0.1);
+      player.voltage = max(0, player.voltage - 0.1);
+    }
+    // Check if cells are balanced
+    if (abs(cells[0].voltage - cells[1].voltage) < 0.1 && 
+        abs(cells[0].voltage - cells[0].targetVoltage) < 0.1) {
+      level.balanced = true;
+    }
+  }
+
   // Keep player within level bounds
   player.x = constrain(player.x, player.radius, width * 2 - player.radius);
+
+  // Check level completion conditions
+  if (overlap(player, level.door)) {
+    if (currentLevel === 1 || // Basic level
+        (currentLevel === 2 && level.barrier.lowered) || // Diode level
+        (currentLevel === 3 && level.charged) || // Capacitor level
+        (currentLevel === 4 && level.adjusted) || // Charger level
+        (currentLevel === 5 && level.charged) || // Cell level
+        (currentLevel === 6 && level.balanced) || // BMS level
+        (currentLevel === 7 && player.voltage >= level.minVoltage)) { // Load level
+      currentLevel++;
+      player.x = 50;
+      player.y = groundY - player.radius;
+      player.vx = 0;
+      player.vy = 0;
+    }
+  }
 }
 
 function keyPressed() {

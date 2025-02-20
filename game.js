@@ -330,7 +330,7 @@ function updatePlayer(level) {
       } else if (c.type === 'charger' && !level.adjusted) {
         let rate = keyIsDown(SHIFT) ? 0.01 : 0.001;
         if (keyIsDown(LEFT_ARROW)) {
-          c.current = max(0.5, c.current - rate);
+          c.current = max(0, c.current - rate);
         }
         if (keyIsDown(RIGHT_ARROW)) {
           c.current = min(2.0, c.current + rate);

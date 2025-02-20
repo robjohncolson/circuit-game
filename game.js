@@ -13,6 +13,7 @@ let groundY = 380;
 let jumpVelocity = -12;
 let onGround = true;
 let showIntro = true;
+let cameraX = 0; // Smoothed camera position
 
 // Level definitions with detailed intros
 let levels = [
@@ -26,7 +27,11 @@ let levels = [
 ];
 
 function setup() {
-  createCanvas(800, 400);
+  createCanvas(windowWidth, windowHeight);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -38,12 +43,12 @@ function draw() {
     let level = levels[currentLevel - 1];
     if (showIntro) {
       textAlign(CENTER);
-      textSize(24);
+      textSize(24 * (min(width / 800, height / 400)));
       fill(0);
-      text("Level " + currentLevel + ": " + level.name, width / 2, height / 2 - 40);
-      textSize(16);
-      text(level.intro, width / 2, height / 2 - 10, width - 40);
-      text("Press Enter to continue", width / 2, height / 2 + 40);
+      text("Level " + currentLevel + ": " + level.name, width / 2, height / 2 - 20 * (height / 400));
+      textSize(16 * (min(width / 800, height / 400)));
+      text(level.intro, width / 2, height / 2);
+      text("Press Enter to continue", width / 2, height / 2 + 20 * (height / 400));
       if (keyIsPressed && keyCode === ENTER) {
         showIntro = false;
       }
@@ -52,7 +57,7 @@ function draw() {
     }
   } else {
     textAlign(CENTER);
-    textSize(32);
+    textSize(32 * (min(width / 800, height / 400)));
     fill(0);
     text("Game Complete!", width / 2, height / 2);
   }
@@ -60,112 +65,133 @@ function draw() {
 
 function drawMenu() {
   textAlign(CENTER);
-  textSize(32);
+  textSize(32 * (min(width / 800, height / 400)));
   fill(0);
-  text("Coulomb's Odyssey", width / 2, height / 2 - 50);
-  textSize(16);
+  text("Coulomb's Odyssey", width / 2, height / 2 - 50 * (height / 400));
+  textSize(16 * (min(width / 800, height / 400)));
   text("Press Enter to Start", width / 2, height / 2);
 }
 
 function drawLevel(levelNum) {
   let level = levels[levelNum - 1];
-  let cameraX = player.x - width / 2;
+  let levelWidth = width * 2;
+  let scaleX = width / 800;
+  let scaleY = height / 400;
+  let scale = min(scaleX, scaleY);
 
-  // Distant layer (slower movement)
-  fill(184, 134, 11); // Dark goldenrod color
-  for (let x = -cameraX * 0.2; x < width * 2; x += 20) {
-    rect(x, 0, 2, height); // Thin lines, 20 pixels apart
+  // Smooth camera movement
+  let targetCameraX = constrain(player.x * scaleX - width / 2, 0, levelWidth - width);
+  cameraX = lerp(cameraX, targetCameraX, 0.1);
+
+  // Draw parallax background layers
+  push();
+  translate(-cameraX * 0.2, 0);
+  fill(184, 134, 11);
+  for (let x = 0; x < levelWidth; x += 20 * scaleX) {
+    rect(x, 0, 2 * scaleX, height);
   }
+  pop();
 
-  // Mid layer (faster movement)
-  fill(150); // Gray color
-  for (let x = -cameraX * 0.5; x < width * 2; x += 10) {
-    rect(x, 0, 1, height); // Thinner lines, 10 pixels apart
+  push();
+  translate(-cameraX * 0.5, 0);
+  fill(150);
+  for (let x = 0; x < levelWidth; x += 10 * scaleX) {
+    rect(x, 0, 1 * scaleX, height);
   }
+  pop();
 
+  // Draw game elements
   push();
   translate(-cameraX, 0);
 
-  // Draw ground
+  // Ground
   fill(139, 69, 19);
-  rect(0, groundY, width * 2, height - groundY);
+  rect(0, groundY * scaleY, levelWidth, height - groundY * scaleY);
 
-  // Draw platforms
+  // Platforms
   for (let p of level.platforms) {
     fill(100);
-    rect(p.x, p.y, p.width, p.height);
+    rect(p.x * scaleX, p.y * scaleY, p.width * scaleX, p.height * scaleY);
   }
 
-  // Draw components
+  // Components
   for (let c of level.components) {
+    let scaledX = c.x * scaleX;
+    let scaledY = c.y * scaleY;
+    let scaledWidth = c.width * scaleX;
+    let scaledHeight = c.height * scaleY;
+
     if (c.type === 'diode') {
       fill(192, 192, 192);
-      rect(c.x, c.y, c.width, c.height);
+      rect(scaledX, scaledY, scaledWidth, scaledHeight);
       fill(0);
-      rect(c.x + c.width / 2, c.y, c.width / 2, c.height);
+      rect(scaledX + scaledWidth / 2, scaledY, scaledWidth / 2, scaledHeight);
     } else if (c.type === 'capacitor') {
       fill(0, 0, 255);
-      rect(c.x, c.y, c.width, c.height);
+      rect(scaledX, scaledY, scaledWidth, scaledHeight);
       if (c.chargeLevel > 0) {
         let chargeRatio = c.chargeLevel / c.chargeTime;
         fill(0, 255, 0);
-        rect(c.x, c.y, c.width * chargeRatio, c.height);
+        rect(scaledX, scaledY, scaledWidth * chargeRatio, scaledHeight);
       }
     } else if (c.type === 'charger') {
       fill(255, 215, 0);
-      rect(c.x, c.y, c.width, c.height);
+      rect(scaledX, scaledY, scaledWidth, scaledHeight);
       fill(0);
-      text("I: " + c.current.toFixed(3) + "A", c.x, c.y - 10);
+      text("I: " + c.current.toFixed(3) + "A", scaledX, scaledY - 10 * scaleY);
     } else if (c.type === 'cell') {
       fill(0, 255, 255);
-      rect(c.x, c.y, c.width, c.height);
+      rect(scaledX, scaledY, scaledWidth, scaledHeight);
       fill(0);
-      text(c.voltage.toFixed(1) + "V", c.x, c.y - 10);
+      text(c.voltage.toFixed(1) + "V", scaledX, scaledY - 10 * scaleY);
     } else if (c.type === 'resistor') {
       fill(165, 42, 42);
-      rect(c.x, c.y, c.width, c.height);
+      rect(scaledX, scaledY, scaledWidth, scaledHeight);
     }
   }
 
-  // Draw door
+  // Door
   fill(255, 0, 0);
-  rect(level.door.x, level.door.y, level.door.width, level.door.height);
+  rect(level.door.x * scaleX, level.door.y * scaleY, 
+       level.door.width * scaleX, level.door.height * scaleY);
 
   // Draw barrier if present
   if (level.barrier && !level.barrier.lowered) {
     fill(255, 0, 0);
-    rect(level.barrier.x, level.barrier.y, level.barrier.width, level.barrier.height);
+    rect(level.barrier.x * scaleX, level.barrier.y * scaleY, 
+         level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
-  // Draw player
+  // Player
   fill(0, 0, 255);
-  ellipse(player.x, player.y, player.radius * 2);
+  ellipse(player.x * scaleX, player.y * scaleY, 
+          player.radius * 2 * scale, player.radius * 2 * scale);
 
   pop();
 
-  // Draw HUD and instructions in screen space
-  push();
+  // HUD
   textAlign(LEFT);
-  textSize(16);
+  textSize(16 * scale);
   fill(0);
-  text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20);
+  text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20 * scaleY);
+  
+  // Level-specific instructions
   if (levelNum === 1) {
-    text("Reach the door!", 10, 40);
+    text("Reach the door!", 10, 40 * scaleY);
   } else if (levelNum === 2) {
-    text("Pay 0.3V at the diode to pass!", 10, 40);
+    text("Pay 0.3V at the diode to pass!", 10, 40 * scaleY);
   } else if (levelNum === 3) {
-    text("Stand on the capacitor to charge!", 10, 40);
-    if (level.charged) text("Charged! Proceed to the door.", 10, 60);
+    text("Stand on the capacitor to charge!", 10, 40 * scaleY);
+    if (level.charged) text("Charged! Proceed to the door.", 10, 60 * scaleY);
   } else if (levelNum === 4) {
-    text("Adjust current to 1.125A with arrow keys!", 10, 40);
+    text("Adjust current to 1.125A with arrow keys!", 10, 40 * scaleY);
   } else if (levelNum === 5) {
-    text("Stand on the cell to charge it to 4.2V!", 10, 40);
+    text("Stand on the cell to charge it to 4.2V!", 10, 40 * scaleY);
   } else if (levelNum === 6) {
-    text("Press Space on cells to balance to 4.0V!", 10, 40);
+    text("Press Space on cells to balance to 4.0V!", 10, 40 * scaleY);
   } else if (levelNum === 7) {
-    text("Reach the door with at least 5V!", 10, 40);
+    text("Reach the door with at least 5V!", 10, 40 * scaleY);
   }
-  pop();
 
   updatePlayer(level);
 }

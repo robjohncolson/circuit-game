@@ -421,19 +421,9 @@ function updatePlayer(level) {
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
   let goalRadius = goalSize / 2;
 
-  // Check if player is in goal area and manage grace period
-  if (distance < goalRadius - player.radius * scale) {
-    inGoalArea = true;
-    inGoalTimer = inGoalGracePeriod;
-  } else if (inGoalTimer > 0) {
-    inGoalTimer--;
-  } else {
-    inGoalArea = false;
-  }
-
-  // Allow spacebar press within grace period
-  if (inGoalArea && keyIsPressed && key === ' ') {
-    // Player is sufficiently inside or in grace period and pressed spacebar
+  // Relaxed condition: Allow partial overlap
+  if (distance < goalRadius - player.radius * scale * 0.5 && keyIsPressed && key === ' ') {
+    // Player is sufficiently inside and pressed spacebar
     if (currentLevel === 1 || 
         (currentLevel === 2 && level.barrier.lowered) || 
         (currentLevel === 3 && level.charged) || 
@@ -459,6 +449,14 @@ function updatePlayer(level) {
         }
       }
     }
+  }
+
+  // Update visual feedback in drawLevel to match the relaxed condition
+  inGoalArea = distance < goalRadius - player.radius * scale * 0.5;
+  if (inGoalArea) {
+    inGoalTimer = inGoalGracePeriod;
+  } else if (inGoalTimer > 0) {
+    inGoalTimer--;
   }
 }
 

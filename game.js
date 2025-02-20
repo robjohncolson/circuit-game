@@ -94,15 +94,15 @@ function drawLevel(levelNum) {
   cameraX = lerp(cameraX, targetCameraX, 0.1);
 
   // Draw distant layer (moving at 20% of camera speed)
-  fill(120, 100, 50); // Darker color for depth
+  fill(120, 100, 50);
   for (let x = -cameraX * 0.2; x < levelWidth; x += 50) {
-    rect(x, 0, 3, height); // 3px thick, 50px apart
+    rect(x, 0, 3, height);
   }
 
   // Draw mid layer (moving at 50% of camera speed)
-  fill(180, 160, 100); // Lighter color for mid layer
+  fill(180, 160, 100);
   for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
-    rect(x, 0, 2, height); // 2px thick, 30px apart
+    rect(x, 0, 2, height);
   }
 
   // Draw game elements
@@ -155,22 +155,25 @@ function drawLevel(levelNum) {
     }
   }
 
-  // Door
-  fill(255, 0, 0);
-  rect(level.door.x * scaleX, level.door.y * scaleY, 
-       level.door.width * scaleX, level.door.height * scaleY);
-
-  // Draw barrier if present
+  // Barrier if present
   if (level.barrier && !level.barrier.lowered) {
     fill(255, 0, 0);
     rect(level.barrier.x * scaleX, level.barrier.y * scaleY, 
          level.barrier.width * scaleX, level.barrier.height * scaleY);
   }
 
-  // Player
+  // Goal Circle
+  let rippleFraction = max(0, (level.ripple.initial - level.ripple.current) / level.ripple.initial);
+  let goalSize = (level.goalCircle.baseSize + (level.goalCircle.maxSize - level.goalCircle.baseSize) * rippleFraction) * scale;
+  fill(0, 255, 0); // Green
+  ellipse(level.goalCircle.x * scaleX, level.goalCircle.y * scaleY, goalSize);
+
+  // Player with shake effect
   fill(0, 0, 255);
-  ellipse(player.x * scaleX, player.y * scaleY, 
-          player.radius * 2 * scale, player.radius * 2 * scale);
+  let shakeAmount = level.ripple.current * 0.5;
+  let shakeX = random(-shakeAmount, shakeAmount);
+  let shakeY = random(-shakeAmount, shakeAmount);
+  ellipse(player.x * scaleX + shakeX, player.y * scaleY + shakeY, player.radius * 2 * scale);
 
   pop();
 
@@ -179,23 +182,24 @@ function drawLevel(levelNum) {
   textSize(16 * scale);
   fill(0);
   text("Voltage: " + player.voltage.toFixed(1) + "V", 10, 20 * scaleY);
+  text("Ripple: " + level.ripple.current.toFixed(1), 10, 40 * scaleY);
   
   // Level-specific instructions
   if (levelNum === 1) {
-    text("Reach the door!", 10, 40 * scaleY);
+    text("Jump through the goal circle!", 10, 60 * scaleY);
   } else if (levelNum === 2) {
-    text("Pay 0.3V at the diode to pass!", 10, 40 * scaleY);
+    text("Pay 0.3V at the diode to pass!", 10, 60 * scaleY);
   } else if (levelNum === 3) {
-    text("Stand on the capacitor to charge!", 10, 40 * scaleY);
-    if (level.charged) text("Charged! Proceed to the door.", 10, 60 * scaleY);
+    text("Stand on the main capacitor to charge!", 10, 60 * scaleY);
+    if (level.charged) text("Charged! Jump through the goal.", 10, 80 * scaleY);
   } else if (levelNum === 4) {
-    text("Adjust current to 1.125A with arrow keys!", 10, 40 * scaleY);
+    text("Adjust current to 1.125A with arrow keys!", 10, 60 * scaleY);
   } else if (levelNum === 5) {
-    text("Stand on the cell to charge it to 4.2V!", 10, 40 * scaleY);
+    text("Stand on the cell to charge it to 4.2V!", 10, 60 * scaleY);
   } else if (levelNum === 6) {
-    text("Press Space on cells to balance to 4.0V!", 10, 40 * scaleY);
+    text("Press Space on cells to balance to 4.0V!", 10, 60 * scaleY);
   } else if (levelNum === 7) {
-    text("Reach the door with at least 5V!", 10, 40 * scaleY);
+    text("Reach the goal with at least 5V!", 10, 60 * scaleY);
   }
 
   updatePlayer(level);

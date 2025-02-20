@@ -83,22 +83,17 @@ function drawLevel(levelNum) {
   let targetCameraX = constrain(player.x * scaleX - width / 2, 0, levelWidth - width);
   cameraX = lerp(cameraX, targetCameraX, 0.1);
 
-  // Draw parallax background layers
-  push();
-  translate(-cameraX * 0.2, 0);
-  fill(184, 134, 11);
-  for (let x = 0; x < levelWidth; x += 20 * scaleX) {
-    rect(x, 0, 2 * scaleX, height);
+  // Draw distant layer (moving at 20% of camera speed)
+  fill(120, 100, 50); // Darker color for depth
+  for (let x = -cameraX * 0.2; x < levelWidth; x += 50) {
+    rect(x, 0, 3, height); // 3px thick, 50px apart
   }
-  pop();
 
-  push();
-  translate(-cameraX * 0.5, 0);
-  fill(150);
-  for (let x = 0; x < levelWidth; x += 10 * scaleX) {
-    rect(x, 0, 1 * scaleX, height);
+  // Draw mid layer (moving at 50% of camera speed)
+  fill(180, 160, 100); // Lighter color for mid layer
+  for (let x = -cameraX * 0.5; x < levelWidth; x += 30) {
+    rect(x, 0, 2, height); // 2px thick, 30px apart
   }
-  pop();
 
   // Draw game elements
   push();

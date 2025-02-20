@@ -13,6 +13,9 @@ let jumpVelocity = -12;
 let onGround = true;
 let showIntro = true;
 let cameraX = 0;
+let inGoalArea = false;
+let inGoalTimer = 0;
+const inGoalGracePeriod = 10; // Frames for grace period
 
 let levels = [
   {
@@ -418,8 +421,19 @@ function updatePlayer(level) {
   let distance = dist(playerCenter.x, playerCenter.y, goalCenter.x, goalCenter.y);
   let goalRadius = goalSize / 2;
 
-  if (distance + player.radius * scale < goalRadius && keyIsPressed && key === ' ') {
-    // Player is completely inside and pressed spacebar
+  // Check if player is in goal area and manage grace period
+  if (distance < goalRadius - player.radius * scale) {
+    inGoalArea = true;
+    inGoalTimer = inGoalGracePeriod;
+  } else if (inGoalTimer > 0) {
+    inGoalTimer--;
+  } else {
+    inGoalArea = false;
+  }
+
+  // Allow spacebar press within grace period
+  if (inGoalArea && keyIsPressed && key === ' ') {
+    // Player is sufficiently inside or in grace period and pressed spacebar
     if (currentLevel === 1 || 
         (currentLevel === 2 && level.barrier.lowered) || 
         (currentLevel === 3 && level.charged) || 
